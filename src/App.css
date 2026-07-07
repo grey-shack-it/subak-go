@@ -11,3 +11,53 @@
     margin: 0 auto;
   }
 }
+
+.juice {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  pointer-events: none;
+  animation: juicePop 250ms ease-out forwards;
+}
+
+.j1 {
+  top: 45%;
+  left: 50%;
+  --tx: -35px;
+  --ty: -30px;
+}
+
+.j2 {
+  top: 45%;
+  left: 50%;
+  --tx: 35px;
+  --ty: -25px;
+}
+
+.j3 {
+  top: 45%;
+  left: 50%;
+  --tx: -25px;
+  --ty: 30px;
+}
+
+.j4 {
+  top: 45%;
+  left: 50%;
+  --tx: 30px;
+  --ty: 35px;
+}
+
+@keyframes juicePop {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0.3);
+  }
+}

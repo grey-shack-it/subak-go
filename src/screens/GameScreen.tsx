@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
+import WatermelonSprite from "../components/WatermelonSprite";
 
 export default function GameScreen() {
     function randomBiteTarget() {
         return Math.floor(Math.random() * 3) + 6;
     }
     const TARGET = 10;
-
+    const FRAME_MAPS: Record<number, number[]> = {
+        6: [0, 2, 3, 5, 6, 8],
+        7: [0, 2, 3, 4, 5, 6, 8],
+        8: [0, 2, 3, 4, 5, 6, 7, 8],
+    };
     const [count, setCount] = useState(0);
     const [time, setTime] = useState(0);
     const [biteCount, setBiteCount] = useState(0);
     const [biteTarget, setBiteTarget] = useState(randomBiteTarget());
-    const [position, setPosition] = useState({
-        x: 120,
-        y: 180,
-    });
+    const [pressed, setPressed] = useState(false);
+    const [juice, setJuice] = useState(false);
+    const [rotation, setRotation] = useState(0);
+    const [spawnPop, setSpawnPop] = useState(false);
 
     useEffect(() => {
         if (count >= TARGET) return;
@@ -26,6 +31,16 @@ export default function GameScreen() {
     }, [count]);
 
     const handleEat = () => {
+        setPressed(true);
+        setJuice(true);
+        setRotation(Math.random() > 0.5 ? 3 : -3);
+
+        setTimeout(() => {
+            setPressed(false);
+            setJuice(false);
+            setRotation(0);
+        }, 120);
+
         if (count >= TARGET) return;
 
         const nextBite = biteCount + 1;
@@ -35,6 +50,12 @@ export default function GameScreen() {
             setCount((prev) => prev + 1);
             setBiteCount(0);
             setBiteTarget(randomBiteTarget());
+
+            setSpawnPop(true);
+
+            setTimeout(() => {
+                setSpawnPop(false);
+            }, 120);
         } else {
             // 아직 먹는 중
             setBiteCount(nextBite);
@@ -120,6 +141,15 @@ export default function GameScreen() {
                         cursor: "pointer",
                         userSelect: "none",
                         textAlign: "center",
+                        transform: `${spawnPop
+                                ? "scale(1.18)"
+                                : pressed
+                                    ? "scale(1.08)"
+                                    : "scale(1)"
+                            } rotate(${rotation}deg)`,
+                        transition: "transform 80ms ease-out",
+                        position: "relative",
+                        display: "inline-block",
                     }}
                 >
                     <div
@@ -132,14 +162,15 @@ export default function GameScreen() {
                         {biteCount + 1} / {biteTarget}
                     </div>
 
-                    <div
-                        style={{
-                            fontSize: "180px",
-                            transition: "transform .08s",
-                        }}
-                    >
-                        🍉
-                    </div>
+                    <WatermelonSprite frame={FRAME_MAPS[biteTarget][biteCount]} />
+                    {juice && (
+                        <>
+                            <div className="juice j1"></div>
+                            <div className="juice j2"></div>
+                            <div className="juice j3"></div>
+                            <div className="juice j4"></div>
+                        </>
+                    )}
                 </div>
             </div>
 
