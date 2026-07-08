@@ -23,29 +23,21 @@
 }
 
 .j1 {
-  top: 45%;
-  left: 50%;
   --tx: -35px;
   --ty: -30px;
 }
 
 .j2 {
-  top: 45%;
-  left: 50%;
   --tx: 35px;
   --ty: -25px;
 }
 
 .j3 {
-  top: 45%;
-  left: 50%;
   --tx: -25px;
   --ty: 30px;
 }
 
 .j4 {
-  top: 45%;
-  left: 50%;
   --tx: 30px;
   --ty: 35px;
 }
@@ -56,8 +48,26 @@
     transform: translate(0, 0) scale(1);
   }
 
+  30% {
+    opacity: 1;
+    transform: translate(calc(var(--tx) * 0.6),
+        calc(var(--ty) * 0.6)) scale(1.4);
+  }
+
   to {
     opacity: 0;
-    transform: translate(var(--tx), var(--ty)) scale(0.3);
+    transform: translate(var(--tx), var(--ty)) scale(0.2);
+  }
+}
+
+@keyframes seedPop {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -90px) scale(1.2) rotate(20deg);
   }
 }

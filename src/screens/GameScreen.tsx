@@ -1,9 +1,42 @@
 import { useEffect, useState } from "react";
 import WatermelonSprite from "../components/WatermelonSprite";
+import Face from "../components/Face";
+import seedImg from "../assets/seed.png";
 
 export default function GameScreen() {
     function randomBiteTarget() {
         return Math.floor(Math.random() * 3) + 6;
+    }
+    function randomSeedCount() {
+        return Math.floor(Math.random() * 4); // 0~3개
+    }
+    function generateSeedPattern(
+        biteTarget: number,
+        seedCount: number
+    ): boolean[] {
+        const pattern = Array(biteTarget).fill(false);
+
+        // 위치 목록 생성
+        const positions = Array.from(
+            { length: biteTarget },
+            (_, i) => i
+        );
+
+        // Fisher-Yates Shuffle
+        for (let i = positions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [positions[i], positions[j]] = [
+                positions[j],
+                positions[i],
+            ];
+        }
+
+        // 앞에서 seedCount개만 true
+        for (let i = 0; i < seedCount; i++) {
+            pattern[positions[i]] = true;
+        }
+
+        return pattern;
     }
     const TARGET = 10;
     const FRAME_MAPS: Record<number, number[]> = {
@@ -11,13 +44,25 @@ export default function GameScreen() {
         7: [0, 2, 3, 4, 5, 6, 8],
         8: [0, 2, 3, 4, 5, 6, 7, 8],
     };
+    const initialBiteTarget = randomBiteTarget();
+    const initialSeedCount = randomSeedCount();
     const [count, setCount] = useState(0);
     const [time, setTime] = useState(0);
     const [biteCount, setBiteCount] = useState(0);
-    const [biteTarget, setBiteTarget] = useState(randomBiteTarget());
+    const [biteTarget, setBiteTarget] = useState(initialBiteTarget);
     const [pressed, setPressed] = useState(false);
     const [juice, setJuice] = useState(false);
+    const [showSeed, setShowSeed] = useState(false);
     const [rotation, setRotation] = useState(0);
+    const [juicePos, setJuicePos] = useState({
+        x: 50,
+        y: 50,
+    });
+    const [seedCount, setSeedCount] = useState(0);
+    const [currentSeeds, setCurrentSeeds] = useState(initialSeedCount);
+    const [seedPattern, setSeedPattern] = useState(
+        generateSeedPattern(initialBiteTarget, initialSeedCount)
+    );
     const [spawnPop, setSpawnPop] = useState(false);
 
     useEffect(() => {
@@ -30,10 +75,16 @@ export default function GameScreen() {
         return () => clearInterval(timer);
     }, [count]);
 
-    const handleEat = () => {
+    const handleEat = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+
+        setJuicePos({
+            x: ((e.clientX - rect.left) / rect.width) * 100,
+            y: ((e.clientY - rect.top) / rect.height) * 100,
+        });
         setPressed(true);
         setJuice(true);
-        setRotation(Math.random() > 0.5 ? 3 : -3);
+        setRotation(Math.random() > 0.5 ? 2.0 : -2.0);
 
         setTimeout(() => {
             setPressed(false);
@@ -41,16 +92,26 @@ export default function GameScreen() {
             setRotation(0);
         }, 120);
 
-        if (count >= TARGET) return;
+        if (count >= TARGET || seedCount >= 10) return;
 
         const nextBite = biteCount + 1;
+        if (seedPattern[biteCount]) {
+            setSeedCount((prev) => Math.min(prev + 1, 10));
+            setShowSeed(true);
+            setTimeout(() => {
+                setShowSeed(false);
+            }, 400);
+        }
 
         if (nextBite >= biteTarget) {
             // 수박 한 조각 다 먹음
             setCount((prev) => prev + 1);
+            const nextBiteTarget = randomBiteTarget();
+            const nextSeedCount = randomSeedCount();
+            setCurrentSeeds(nextSeedCount);
+            setSeedPattern(generateSeedPattern(nextBiteTarget, nextSeedCount));
             setBiteCount(0);
-            setBiteTarget(randomBiteTarget());
-
+            setBiteTarget(nextBiteTarget);
             setSpawnPop(true);
 
             setTimeout(() => {
@@ -60,6 +121,11 @@ export default function GameScreen() {
             // 아직 먹는 중
             setBiteCount(nextBite);
         }
+    };
+    const spitSeeds = () => {
+        if (seedCount === 0) return;
+
+        setSeedCount(0);
     };
 
     return (
@@ -142,10 +208,10 @@ export default function GameScreen() {
                         userSelect: "none",
                         textAlign: "center",
                         transform: `${spawnPop
-                                ? "scale(1.18)"
-                                : pressed
-                                    ? "scale(1.08)"
-                                    : "scale(1)"
+                            ? "scale(1.18)"
+                            : pressed
+                                ? "scale(1.06)"
+                                : "scale(1)"
                             } rotate(${rotation}deg)`,
                         transition: "transform 80ms ease-out",
                         position: "relative",
@@ -165,24 +231,100 @@ export default function GameScreen() {
                     <WatermelonSprite frame={FRAME_MAPS[biteTarget][biteCount]} />
                     {juice && (
                         <>
-                            <div className="juice j1"></div>
-                            <div className="juice j2"></div>
-                            <div className="juice j3"></div>
-                            <div className="juice j4"></div>
+                            <div
+                                className="juice j1"
+                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
+                            ></div>
+
+                            <div
+                                className="juice j2"
+                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
+                            ></div>
+
+                            <div
+                                className="juice j3"
+                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
+                            ></div>
+
+                            <div
+                                className="juice j4"
+                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
+                            ></div>
                         </>
+                    )}
+                    {showSeed && (
+                        <div
+                            style={{
+                                position: "absolute",
+                                left: `${juicePos.x}%`,
+                                top: `${juicePos.y}%`,
+                                transform: "translate(-50%, -50%)",
+                                fontSize: "28px",
+                                pointerEvents: "none",
+                                animation: "seedPop 0.4s ease-out forwards",
+                            }}
+                        >
+                            🌱
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* 씨앗(임시) */}
             <div
                 style={{
                     textAlign: "center",
-                    fontSize: "18px",
-                    marginBottom: "20px",
+                    marginBottom: "16px",
                 }}
             >
-                씨앗 : ⚫⚫⚫⚫⚫⚫⚫⚫⚫⚫
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        marginBottom: "8px",
+                        cursor: "pointer",
+                    }}
+                    onClick={spitSeeds}
+                >
+                    <Face
+                        state={
+                            seedCount >= 10
+                                ? 3
+                                : seedCount >= 6
+                                    ? 2
+                                    : 1
+                        }
+                    />
+                </div>
+
+                <div
+                    style={{
+                        fontSize: "24px",
+                        letterSpacing: "2px",
+                    }}
+                >
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "4px",
+                        }}
+                    >
+                        {Array.from({ length: 10 }).map((_, i) => (
+                            <img
+                                key={i}
+                                src={seedImg}
+                                alt=""
+                                draggable={false}
+                                style={{
+                                    width: 16,
+                                    height: 16,
+                                    opacity: i < seedCount ? 1 : 0.18,
+                                    userSelect: "none",
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
