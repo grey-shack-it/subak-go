@@ -3,6 +3,7 @@ import WatermelonSprite from "../components/WatermelonSprite";
 import Face from "../components/Face";
 import seedImg from "../assets/seed.png";
 import popImg from "../assets/pop.png";
+import SeedParticle from "../components/SeedParticle";
 
 export default function GameScreen() {
     function randomBiteTarget() {
@@ -63,7 +64,8 @@ export default function GameScreen() {
     const [flyingSeeds, setFlyingSeeds] = useState<
         {
             id: number;
-            angle: number;
+            x: number;
+            y: number;
             delay: number;
         }[]
     >([]);
@@ -133,11 +135,20 @@ export default function GameScreen() {
     const spitSeeds = () => {
         if (seedCount === 0) return;
         setFlyingSeeds(
-            Array.from({ length: seedCount }, (_, i) => ({
-                id: Date.now() + i,
-                angle: -60 + (120 / Math.max(seedCount - 1, 1)) * i,
-                delay: i * 35,
-            }))
+            Array.from({ length: seedCount }, (_, i) => {
+                const angle =
+                    (110 - (40 / Math.max(seedCount - 1, 1)) * i) *
+                    Math.PI /
+                    180;
+                const distance = 650;
+
+                return {
+                    id: Date.now() + i,
+                    delay: i * 35,
+                    x: Math.cos(angle) * distance,
+                    y: -Math.sin(angle) * distance,
+                };
+            })
         );
         setSeedCount(0);
     };
@@ -357,24 +368,12 @@ export default function GameScreen() {
                                         : 1
                         }
                     />
-
                     {flyingSeeds.map((seed) => (
-                        <img
+                        <SeedParticle
                             key={seed.id}
-                            src={seedImg}
-                            alt=""
-                            draggable={false}
-                            style={{
-                                position: "absolute",
-                                left: "50%",
-                                top: "68%",
-                                width: "18px",
-                                height: "18px",
-                                transform: `translate(-50%, -50%) rotate(${seed.angle}deg)`,
-                                animation: `spitSeed 500ms linear ${seed.delay}ms forwards`,
-                                pointerEvents: "none",
-                                border: "1px solid lime",
-                            }}
+                            x={seed.x}
+                            y={seed.y}
+                            delay={seed.delay}
                         />
                     ))}
                 </div>
