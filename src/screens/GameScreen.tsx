@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import WatermelonSprite from "../components/WatermelonSprite";
 import Face from "../components/Face";
 import seedImg from "../assets/seed.png";
+import popImg from "../assets/pop.png";
 
 export default function GameScreen() {
     function randomBiteTarget() {
@@ -59,6 +60,13 @@ export default function GameScreen() {
         y: 50,
     });
     const [seedCount, setSeedCount] = useState(0);
+    const [flyingSeeds, setFlyingSeeds] = useState<
+        {
+            id: number;
+            angle: number;
+            delay: number;
+        }[]
+    >([]);
     const [currentSeeds, setCurrentSeeds] = useState(initialSeedCount);
     const [seedPattern, setSeedPattern] = useState(
         generateSeedPattern(initialBiteTarget, initialSeedCount)
@@ -124,7 +132,13 @@ export default function GameScreen() {
     };
     const spitSeeds = () => {
         if (seedCount === 0) return;
-
+        setFlyingSeeds(
+            Array.from({ length: seedCount }, (_, i) => ({
+                id: Date.now() + i,
+                angle: -60 + (120 / Math.max(seedCount - 1, 1)) * i,
+                delay: i * 35,
+            }))
+        );
         setSeedCount(0);
     };
 
@@ -231,41 +245,87 @@ export default function GameScreen() {
                     <WatermelonSprite frame={FRAME_MAPS[biteTarget][biteCount]} />
                     {juice && (
                         <>
-                            <div
+                            <img
+                                src={popImg}
                                 className="juice j1"
-                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
-                            ></div>
+                                draggable={false}
+                                alt=""
+                                style={{
+                                    left: `${juicePos.x}%`,
+                                    top: `${juicePos.y}%`,
+                                    width: "18px",
+                                    height: "18px",
+                                    position: "absolute",
+                                    pointerEvents: "none",
+                                    transform: "rotate(-25deg)",
+                                }}
+                            />
 
-                            <div
+                            <img
+                                src={popImg}
                                 className="juice j2"
-                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
-                            ></div>
+                                draggable={false}
+                                alt=""
+                                style={{
+                                    left: `${juicePos.x}%`,
+                                    top: `${juicePos.y}%`,
+                                    width: "28px",
+                                    height: "28px",
+                                    position: "absolute",
+                                    pointerEvents: "none",
+                                    transform: "rotate(18deg)",
+                                }}
+                            />
 
-                            <div
+                            <img
+                                src={popImg}
                                 className="juice j3"
-                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
-                            ></div>
+                                draggable={false}
+                                alt=""
+                                style={{
+                                    left: `${juicePos.x}%`,
+                                    top: `${juicePos.y}%`,
+                                    width: "22px",
+                                    height: "22px",
+                                    position: "absolute",
+                                    pointerEvents: "none",
+                                    transform: "rotate(110deg)",
+                                }}
+                            />
 
-                            <div
+                            <img
+                                src={popImg}
                                 className="juice j4"
-                                style={{ left: `${juicePos.x}%`, top: `${juicePos.y}%` }}
-                            ></div>
+                                draggable={false}
+                                alt=""
+                                style={{
+                                    left: `${juicePos.x}%`,
+                                    top: `${juicePos.y}%`,
+                                    width: "30px",
+                                    height: "30px",
+                                    position: "absolute",
+                                    pointerEvents: "none",
+                                    transform: "rotate(-75deg)",
+                                }}
+                            />
                         </>
                     )}
                     {showSeed && (
-                        <div
+                        <img
+                            src={seedImg}
+                            alt=""
+                            draggable={false}
                             style={{
                                 position: "absolute",
                                 left: `${juicePos.x}%`,
                                 top: `${juicePos.y}%`,
+                                width: "22px",
+                                height: "22px",
                                 transform: "translate(-50%, -50%)",
-                                fontSize: "28px",
                                 pointerEvents: "none",
                                 animation: "seedPop 0.4s ease-out forwards",
                             }}
-                        >
-                            🌱
-                        </div>
+                        />
                     )}
                 </div>
             </div>
@@ -282,18 +342,41 @@ export default function GameScreen() {
                         justifyContent: "center",
                         marginBottom: "8px",
                         cursor: "pointer",
+                        position: "relative",
                     }}
                     onClick={spitSeeds}
                 >
                     <Face
                         state={
                             seedCount >= 10
-                                ? 3
-                                : seedCount >= 6
-                                    ? 2
-                                    : 1
+                                ? 4
+                                : seedCount >= 7
+                                    ? 3
+                                    : seedCount >= 4
+                                        ? 2
+                                        : 1
                         }
                     />
+
+                    {flyingSeeds.map((seed) => (
+                        <img
+                            key={seed.id}
+                            src={seedImg}
+                            alt=""
+                            draggable={false}
+                            style={{
+                                position: "absolute",
+                                left: "50%",
+                                top: "68%",
+                                width: "18px",
+                                height: "18px",
+                                transform: `translate(-50%, -50%) rotate(${seed.angle}deg)`,
+                                animation: `spitSeed 500ms linear ${seed.delay}ms forwards`,
+                                pointerEvents: "none",
+                                border: "1px solid lime",
+                            }}
+                        />
+                    ))}
                 </div>
 
                 <div
