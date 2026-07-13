@@ -102,7 +102,7 @@ export default function GameScreen() {
             setTimeout(() => {
                 const audio = new Audio(spitSound);
                 audio.play().catch(() => { });
-            }, i * 70);
+            }, i * 35);
         }
     };
     const playFinish = () => {
