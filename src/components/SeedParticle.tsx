@@ -13,13 +13,21 @@ export default function SeedParticle({
     delay,
 }: Props) {
     const [start, setStart] = useState(false);
+    const [visible, setVisible] = useState(true);
 
     useEffect(() => {
-        const t = setTimeout(() => {
+        const t1 = setTimeout(() => {
             setStart(true);
         }, delay);
 
-        return () => clearTimeout(t);
+        const t2 = setTimeout(() => {
+            setVisible(false);
+        }, delay + 190);
+
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+        };
     }, [delay]);
 
     return (
@@ -39,7 +47,11 @@ export default function SeedParticle({
                     ? `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
                     : "translate(-50%, -50%)",
 
-                transition: "transform 280ms ease-out",
+                transition: `
+                    transform 220ms linear,
+                    opacity 90ms linear
+                `,
+                opacity: visible ? 1 : 0,
             }}
         />
     );

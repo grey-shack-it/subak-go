@@ -1,11 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import WatermelonSprite from "../components/WatermelonSprite";
 import Face from "../components/Face";
 import seedImg from "../assets/seed.png";
 import popImg from "../assets/pop.png";
 import SeedParticle from "../components/SeedParticle";
+import count3Img from "../assets/count3.png";
+import count2Img from "../assets/count2.png";
+import count1Img from "../assets/count1.png";
+import goImg from "../assets/go.png";
+import popSound from "../assets/sounds/pop.mp3";
+import spitSound from "../assets/sounds/spit.mp3";
+import goSound from "../assets/sounds/go.mp3";
+import finishSound from "../assets/sounds/finish.mp3";
 
 export default function GameScreen() {
+
+    console.log(goSound);
+
     function randomBiteTarget() {
         return Math.floor(Math.random() * 3) + 6;
     }
@@ -74,18 +85,76 @@ export default function GameScreen() {
         generateSeedPattern(initialBiteTarget, initialSeedCount)
     );
     const [spawnPop, setSpawnPop] = useState(false);
+    const [isGameOver, setIsGameOver] = useState(false);
+    const [finalTime, setFinalTime] = useState(0);
+    const [countdown, setCountdown] = useState<number | null>(3);
+    const [gameStarted, setGameStarted] = useState(false);
+    const playGo = () => {
+        const audio = new Audio(goSound);
+        audio.play().catch(() => { });
+    };
+    const playPop = () => {
+        const audio = new Audio(popSound);
+        audio.play().catch(() => { });
+    };
+    const playSpit = (count: number) => {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                const audio = new Audio(spitSound);
+                audio.play().catch(() => { });
+            }, i * 70);
+        }
+    };
+    const playFinish = () => {
+        const audio = new Audio(finishSound);
+        audio.play().catch(() => { });
+    };
 
     useEffect(() => {
-        if (count >= TARGET) return;
+        if (!gameStarted || isGameOver) return;
 
         const timer = setInterval(() => {
             setTime((prev) => prev + 10);
         }, 10);
 
         return () => clearInterval(timer);
+    }, [gameStarted, isGameOver]);
+
+    useEffect(() => {
+        if (count < TARGET) return;
+
+        playFinish();
+
+        setFinalTime(time);
+        setIsGameOver(true);
     }, [count]);
 
+    useEffect(() => {
+        if (countdown === null) return;
+        if (countdown === 3) {
+            playGo();
+        }
+        if (countdown > 0) {
+            const timer = setTimeout(() => {
+                setCountdown((prev) => (prev ?? 0) - 1);
+            }, 1000);
+
+            return () => clearTimeout(timer);
+        }
+
+        if (countdown === 0) {
+            const timer = setTimeout(() => {
+                setCountdown(null);
+                setGameStarted(true);
+            }, 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
     const handleEat = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!gameStarted || isGameOver) return;
+        playPop();
         const rect = e.currentTarget.getBoundingClientRect();
 
         setJuicePos({
@@ -134,6 +203,7 @@ export default function GameScreen() {
     };
     const spitSeeds = () => {
         if (seedCount === 0) return;
+        playSpit(seedCount);
         setFlyingSeeds(
             Array.from({ length: seedCount }, (_, i) => {
                 const angle =
@@ -151,6 +221,42 @@ export default function GameScreen() {
             })
         );
         setSeedCount(0);
+        setTimeout(() => {
+            setFlyingSeeds([]);
+        }, 1000);
+    };
+
+    const restartGame = () => {
+        const firstBiteTarget = randomBiteTarget();
+        const firstSeedCount = randomSeedCount();
+
+        setCount(0);
+        setTime(0);
+
+        setBiteCount(0);
+        setBiteTarget(firstBiteTarget);
+
+        setSeedCount(0);
+        setCurrentSeeds(firstSeedCount);
+
+        setSeedPattern(
+            generateSeedPattern(firstBiteTarget, firstSeedCount)
+        );
+
+        setFlyingSeeds([]);
+
+        setPressed(false);
+        setJuice(false);
+        setShowSeed(false);
+        setSpawnPop(false);
+
+        setRotation(0);
+
+        setFinalTime(0);
+        setIsGameOver(false);
+
+        setCountdown(3);
+        setGameStarted(false);
     };
 
     return (
@@ -164,6 +270,110 @@ export default function GameScreen() {
                 boxSizing: "border-box",
             }}
         >
+            {countdown !== null && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(0,0,0,0.25)",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 998,
+                        pointerEvents: "none",
+                    }}
+                >
+                    <img
+                        key={countdown}
+                        src={
+                            countdown === 3
+                                ? count3Img
+                                : countdown === 2
+                                    ? count2Img
+                                    : countdown === 1
+                                        ? count1Img
+                                        : goImg
+                        }
+                        alt=""
+                        draggable={false}
+                        style={{
+                            width: countdown === 0 ? "450px" : "220px",
+                            userSelect: "none",
+                            pointerEvents: "none",
+
+                            animation:
+                                countdown === 0
+                                    ? "goPop 260ms cubic-bezier(.18,1.3,.32,1)"
+                                    : "countdownSlide 1000ms ease-out",
+                        }}
+                    />
+                </div>
+            )}
+            {isGameOver && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        background: "rgba(0,0,0,0.45)",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        zIndex: 999,
+                    }}
+                >
+                    <div
+                        style={{
+                            background: "white",
+                            borderRadius: "20px",
+                            padding: "28px",
+                            minWidth: "280px",
+                            textAlign: "center",
+                            boxShadow: "0 12px 30px rgba(0,0,0,0.2)",
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontSize: "36px",
+                                marginBottom: "12px",
+                            }}
+                        >
+                            🎉
+                        </div>
+
+                        <div
+                            style={{
+                                fontSize: "28px",
+                                fontWeight: "bold",
+                                marginBottom: "18px",
+                            }}
+                        >
+                            FINISH!
+                        </div>
+
+                        <div
+                            style={{
+                                fontSize: "22px",
+                                marginBottom: "24px",
+                            }}
+                        >
+                            {(finalTime / 1000).toFixed(2)}초
+                        </div>
+
+                        <button
+                            onClick={restartGame}
+                            style={{
+                                padding: "12px 24px",
+                                fontSize: "18px",
+                                borderRadius: "12px",
+                                border: "none",
+                                cursor: "pointer",
+                            }}
+                        >
+                            다시하기
+                        </button>
+                    </div>
+                </div>
+            )}
             {/* 상단 HUD */}
             <div
                 style={{
@@ -354,6 +564,14 @@ export default function GameScreen() {
                         marginBottom: "8px",
                         cursor: "pointer",
                         position: "relative",
+                        animation:
+                            seedCount >= 10
+                                ? "faceShake 0.14s infinite"
+                                : seedCount >= 7
+                                    ? "faceWobble 0.18s infinite"
+                                    : seedCount >= 4
+                                        ? "faceWobble 0.35s infinite"
+                                        : "faceFloat 1.5s ease-in-out infinite",
                     }}
                     onClick={spitSeeds}
                 >

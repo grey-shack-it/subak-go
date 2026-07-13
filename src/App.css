@@ -92,3 +92,100 @@
     opacity: 1;
   }
 }
+
+@keyframes faceFloat {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(2deg);
+  }
+}
+
+@keyframes faceWobble {
+  0% {
+    transform: rotate(-4deg);
+  }
+
+  50% {
+    transform: rotate(4deg);
+  }
+
+  100% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes faceShake {
+  0% {
+    transform: translateX(-2px);
+  }
+
+  25% {
+    transform: translateX(2px);
+  }
+
+  50% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
+
+  100% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes countdownSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(-180px);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translateX(20px);
+  }
+
+  28% {
+    transform: translateX(0);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+@keyframes goPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  55% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+
+  75% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

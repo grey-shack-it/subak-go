@@ -1,10 +1,15 @@
 import { Button } from "@toss/tds-mobile";
+import { useEffect } from "react";
+import { playHomeBgm } from "../utils/bgm";
 
 type HomeScreenProps = {
   onStart: () => void;
 };
 
 export default function HomeScreen({ onStart }: HomeScreenProps) {
+  useEffect(() => {
+    playHomeBgm();
+  }, []);
   return (
     <div
       style={{
