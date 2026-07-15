@@ -1,83 +1,108 @@
 #root {
   width: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
-
-@media (min-width: 481px) {
-  #root {
-    background-color: #ffffff !important;
-    max-width: 480px;
-    margin: 0 auto;
-  }
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .juice {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 1.8vw;
+  height: 1.8vw;
+  max-width: 16px;
+  max-height: 16px;
   pointer-events: none;
-  animation: juicePop 650ms cubic-bezier(.22, .75, .3, 1) forwards;
+  animation: juicePop 1000ms cubic-bezier(.22, .75, .3, 1) forwards;
 }
 
 .j1 {
-  --tx: -35px;
-  --ty: -30px;
+  --tx: -90px;
+  --ty: -80px;
 }
 
 .j2 {
-  --tx: 35px;
-  --ty: -25px;
+  --tx: 90px;
+  --ty: -70px;
 }
 
 .j3 {
-  --tx: -25px;
-  --ty: 30px;
+  --tx: -70px;
+  --ty: 80px;
 }
 
 .j4 {
-  --tx: 30px;
-  --ty: 35px;
+  --tx: 75px;
+  --ty: 90px;
+}
+
+.j5 {
+  --tx: -80px;
+  --ty: 20px;
+}
+
+.j6 {
+  --tx: 80px;
+  --ty: 10px;
+}
+
+.j7 {
+  --tx: -20px;
+  --ty: -100px;
+}
+
+.j8 {
+  --tx: 20px;
+  --ty: 100px;
 }
 
 @keyframes juicePop {
   0% {
     opacity: 0;
     transform:
-      translate(0, 0) scale(0.3) rotate(0deg);
+      translate(0, 0) scale(0.2) rotate(0deg);
   }
 
-  18% {
+  20% {
     opacity: 1;
     transform:
-      translate(calc(var(--tx) * 0.45),
-        calc(var(--ty) * 0.45)) scale(1.35) rotate(40deg);
+      translate(calc(var(--tx) * 0.7),
+        calc(var(--ty) * 0.7)) scale(1.6) rotate(80deg);
   }
 
-  55% {
+  60% {
     opacity: 1;
     transform:
-      translate(calc(var(--tx) * 0.9),
-        calc(var(--ty) * 0.9)) scale(1) rotate(90deg);
+      translate(var(--tx),
+        var(--ty)) scale(1) rotate(180deg);
   }
 
   100% {
     opacity: 0;
     transform:
-      translate(var(--tx),
-        calc(var(--ty) + 18px)) scale(0.75) rotate(140deg);
+      translate(calc(var(--tx) * 1.4),
+        calc(var(--ty) * 1.4)) scale(0.4) rotate(360deg);
   }
 }
 
 @keyframes seedPop {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.6);
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
   }
 
-  to {
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -60%) scale(1.1);
+  }
+
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -80px) scale(1.2) rotate(15deg);
+  }
+
+  100% {
     opacity: 0;
-    transform: translate(-50%, -90px) scale(1.2) rotate(20deg);
+    transform: translate(-50%, -110px) scale(1) rotate(30deg);
   }
 }
 
@@ -188,4 +213,48 @@
     transform: scale(1);
     opacity: 1;
   }
+}
+
+.nickname-input::placeholder {
+  font-size: clamp(14px, 2.2vw, 24px);
+  color: #999;
+}
+
+.watermelon-idle {
+  animation: watermelonShake 1.2s linear infinite;
+}
+
+@keyframes watermelonShake {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(8deg);
+  }
+
+  50% {
+    transform: rotate(0deg);
+  }
+
+  75% {
+    transform: rotate(-8deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.25);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }

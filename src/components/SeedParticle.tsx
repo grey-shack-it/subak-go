@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import seedImg from "../assets/seed.png";
+import seedImg from "../assets/seed.webp";
 
 type Props = {
     x: number;
@@ -39,8 +39,10 @@ export default function SeedParticle({
                 position: "absolute",
                 left: "50%",
                 top: "68%",
-                width: 18,
-                height: 18,
+                width: "15cqw",
+                height: "15cqw",
+                maxWidth: "25px",
+                maxHeight: "25px",
                 pointerEvents: "none",
 
                 transform: start

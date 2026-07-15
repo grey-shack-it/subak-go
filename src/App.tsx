@@ -1,17 +1,38 @@
 import { useState } from "react";
 import "./App.css";
-
 import HomeScreen from "./screens/HomeScreen";
 import GameScreen from "./screens/GameScreen";
+import RankingScreen from "./screens/RankingScreen";
 
 function App() {
-  const [screen, setScreen] = useState<"home" | "game">("home");
+  const [screen, setScreen] = useState<"home" | "game" | "ranking">("home");
 
-  if (screen === "home") {
-    return <HomeScreen onStart={() => setScreen("game")} />;
+  switch (screen) {
+    case "home":
+      return (
+        <HomeScreen
+          onStart={() => setScreen("game")}
+          onRanking={() => setScreen("ranking")}
+        />
+      );
+
+    case "game":
+      return (
+        <GameScreen
+          onFinish={() => setScreen("ranking")}
+        />
+      );
+
+    case "ranking":
+      return (
+        <RankingScreen
+          onHome={() => setScreen("home")}
+        />
+      );
+
+    default:
+      return null;
   }
-
-  return <GameScreen />;
 }
 
 export default App;

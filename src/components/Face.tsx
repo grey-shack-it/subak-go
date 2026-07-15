@@ -1,7 +1,7 @@
-import face1 from "../assets/face1.png";
-import face2 from "../assets/face2.png";
-import face3 from "../assets/face3.png";
-import face4 from "../assets/face4.png";
+import face1 from "../assets/face1.webp";
+import face2 from "../assets/face2.webp";
+import face3 from "../assets/face3.webp";
+import face4 from "../assets/face4.webp";
 
 type Props = {
     state: 1 | 2 | 3 | 4;
@@ -21,7 +21,8 @@ export default function Face({ state }: Props) {
             alt="face"
             draggable={false}
             style={{
-                width: 90,
+                width: "30cqw",
+                maxWidth: "150px",
                 userSelect: "none",
                 pointerEvents: "none",
             }}

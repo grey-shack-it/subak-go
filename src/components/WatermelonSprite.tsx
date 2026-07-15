@@ -1,10 +1,8 @@
-import watermelonSheet from "../assets/watermelon_sheet.png";
+import watermelonSheet from "../assets/watermelon_sheet.webp";
 
 type Props = {
   frame: number;
 };
-
-const DISPLAY_SIZE = 480;     // 화면에 보여줄 크기
 
 export default function WatermelonSprite({ frame }: Props) {
   const col = frame % 3;
@@ -13,16 +11,17 @@ export default function WatermelonSprite({ frame }: Props) {
   return (
     <div
       style={{
-        width: DISPLAY_SIZE,
-        height: DISPLAY_SIZE,        
+        width: "120cqw",
+        height: "120cqw",
+        maxWidth: "480px",
+        maxHeight: "480px",
+
         backgroundImage: `url(${watermelonSheet})`,
         backgroundRepeat: "no-repeat",
 
-        // 원본(3072x3072)을 화면 크기에 맞게 축소
-        backgroundSize: `${DISPLAY_SIZE * 3}px ${DISPLAY_SIZE * 3}px`,
+        backgroundSize: "300% 300%",
 
-        // 원하는 칸만 보여주기
-        backgroundPosition: `-${col * DISPLAY_SIZE}px -${row * DISPLAY_SIZE}px`,
+        backgroundPosition: `${col * 50}% ${row * 50}%`,
       }}
     />
   );

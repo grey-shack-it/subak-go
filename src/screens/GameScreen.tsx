@@ -1,19 +1,46 @@
 import { useEffect, useRef, useState } from "react";
 import WatermelonSprite from "../components/WatermelonSprite";
 import Face from "../components/Face";
-import seedImg from "../assets/seed.png";
-import popImg from "../assets/pop.png";
+import seedImg from "../assets/seed.webp";
+import popImg from "../assets/pop.webp";
 import SeedParticle from "../components/SeedParticle";
-import count3Img from "../assets/count3.png";
-import count2Img from "../assets/count2.png";
-import count1Img from "../assets/count1.png";
-import goImg from "../assets/go.png";
-import popSound from "../assets/sounds/pop.mp3";
-import spitSound from "../assets/sounds/spit.mp3";
-import goSound from "../assets/sounds/go.mp3";
-import finishSound from "../assets/sounds/finish.mp3";
+import count3Img from "../assets/count3.webp";
+import count2Img from "../assets/count2.webp";
+import count1Img from "../assets/count1.webp";
+import goImg from "../assets/go.webp";
+import popSound from "../assets/sounds/pop.ogg";
+import spitSound from "../assets/sounds/spit.ogg";
+import goSound from "../assets/sounds/go.ogg";
+import finishSound from "../assets/sounds/finish.ogg";
+import watermelonSheet from "../assets/watermelon_sheet.webp";
+import BG1 from "../assets/BG1.webp";
+import BG2 from "../assets/BG2.webp";
+import BG3 from "../assets/BG3.webp";
+import BG4 from "../assets/BG4.webp";
+import BG5 from "../assets/BG5.webp";
+import BG6 from "../assets/BG6.webp";
+import BG7 from "../assets/BG7.webp";
+import BG8 from "../assets/BG8.webp";
+import { saveRanking } from "../lib/supabase";
 
-export default function GameScreen() {
+const BACKGROUNDS = [
+    BG1,
+    BG2,
+    BG3,
+    BG4,
+    BG5,
+    BG6,
+    BG7,
+    BG8,
+];
+
+type GameScreenProps = {
+    onFinish: () => void;
+};
+
+export default function GameScreen({
+    onFinish,
+}: GameScreenProps) {
 
     console.log(goSound);
 
@@ -51,6 +78,9 @@ export default function GameScreen() {
 
         return pattern;
     }
+    const [background] = useState(
+        BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]
+    );
     const TARGET = 10;
     const FRAME_MAPS: Record<number, number[]> = {
         6: [0, 2, 3, 5, 6, 8],
@@ -122,11 +152,24 @@ export default function GameScreen() {
 
     useEffect(() => {
         if (count < TARGET) return;
-
-        playFinish();
-
-        setFinalTime(time);
-        setIsGameOver(true);
+        const finishGame = async () => {
+            playFinish();
+            const penalty = seedCount * 200;
+            const finalRecord = time + penalty;
+            setFinalTime(finalRecord);
+            const nickname = localStorage.getItem("nickname");
+            if (nickname) {
+                try {
+                    const penalty = seedCount * 200;
+                    const finalRecord = time + penalty;
+                    await saveRanking(nickname, finalRecord);
+                } catch (e) {
+                    console.error("랭킹 저장 실패", e);
+                }
+            }
+            setIsGameOver(true);
+        };
+        finishGame();
     }, [count]);
 
     useEffect(() => {
@@ -262,367 +305,496 @@ export default function GameScreen() {
     return (
         <div
             style={{
-                minHeight: "100vh",
-                background: "#EAF8FF",
+                width: "100%",
+                height: "100vh",
                 display: "flex",
-                flexDirection: "column",
-                padding: "20px",
-                boxSizing: "border-box",
+                justifyContent: "center",
+                alignItems: "center",
+                background: "#000",
             }}
         >
-            {countdown !== null && (
-                <div
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.25)",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        zIndex: 998,
-                        pointerEvents: "none",
-                    }}
-                >
-                    <img
-                        key={countdown}
-                        src={
-                            countdown === 3
-                                ? count3Img
-                                : countdown === 2
-                                    ? count2Img
-                                    : countdown === 1
-                                        ? count1Img
-                                        : goImg
-                        }
-                        alt=""
-                        draggable={false}
+            <div
+                style={{
+                    position: "relative",
+                    height: "100vh",
+                    aspectRatio: "9 / 16",
+                    containerType: "inline-size",
+                    overflow: "hidden",
+                    backgroundImage: `url(${background})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: "20px",
+                    boxSizing: "border-box",
+                }}
+            >
+                {countdown !== null && (
+                    <div
                         style={{
-                            width: countdown === 0 ? "450px" : "220px",
-                            userSelect: "none",
+                            position: "fixed",
+                            inset: 0,
+                            background: "rgba(0,0,0,0.25)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 998,
                             pointerEvents: "none",
-
-                            animation:
-                                countdown === 0
-                                    ? "goPop 260ms cubic-bezier(.18,1.3,.32,1)"
-                                    : "countdownSlide 1000ms ease-out",
-                        }}
-                    />
-                </div>
-            )}
-            {isGameOver && (
-                <div
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.45)",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        zIndex: 999,
-                    }}
-                >
-                    <div
-                        style={{
-                            background: "white",
-                            borderRadius: "20px",
-                            padding: "28px",
-                            minWidth: "280px",
-                            textAlign: "center",
-                            boxShadow: "0 12px 30px rgba(0,0,0,0.2)",
                         }}
                     >
-                        <div
-                            style={{
-                                fontSize: "36px",
-                                marginBottom: "12px",
-                            }}
-                        >
-                            🎉
-                        </div>
-
-                        <div
-                            style={{
-                                fontSize: "28px",
-                                fontWeight: "bold",
-                                marginBottom: "18px",
-                            }}
-                        >
-                            FINISH!
-                        </div>
-
-                        <div
-                            style={{
-                                fontSize: "22px",
-                                marginBottom: "24px",
-                            }}
-                        >
-                            {(finalTime / 1000).toFixed(2)}초
-                        </div>
-
-                        <button
-                            onClick={restartGame}
-                            style={{
-                                padding: "12px 24px",
-                                fontSize: "18px",
-                                borderRadius: "12px",
-                                border: "none",
-                                cursor: "pointer",
-                            }}
-                        >
-                            다시하기
-                        </button>
-                    </div>
-                </div>
-            )}
-            {/* 상단 HUD */}
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "20px",
-                }}
-            >
-                <div
-                    style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                    }}
-                >
-                    🍉 {TARGET - count}개 남음
-                </div>
-
-                <div
-                    style={{
-                        fontSize: "20px",
-                        fontWeight: "bold",
-                    }}
-                >
-                    ⏱ {(time / 1000).toFixed(2)}초
-                </div>
-            </div>
-
-            {/* 대기 중인 수박 */}
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "30px",
-                }}
-            >
-                {Array.from({
-                    length: Math.min(TARGET - count - 1, 6),
-                }).map((_, i) => (
-                    <div
-                        key={i}
-                        style={{
-                            fontSize: `${42 - i * 4}px`,
-                            opacity: 1 - i * 0.12,
-                        }}
-                    >
-                        🍉
-                    </div>
-                ))}
-            </div>
-
-            {/* 현재 먹는 수박 */}
-            <div
-                style={{
-                    flex: 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
-            >
-                <div
-                    onClick={handleEat}
-                    style={{
-                        cursor: "pointer",
-                        userSelect: "none",
-                        textAlign: "center",
-                        transform: `${spawnPop
-                            ? "scale(1.18)"
-                            : pressed
-                                ? "scale(1.06)"
-                                : "scale(1)"
-                            } rotate(${rotation}deg)`,
-                        transition: "transform 80ms ease-out",
-                        position: "relative",
-                        display: "inline-block",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: "24px",
-                            fontWeight: "bold",
-                            marginBottom: "12px",
-                        }}
-                    >
-                        {biteCount + 1} / {biteTarget}
-                    </div>
-
-                    <WatermelonSprite frame={FRAME_MAPS[biteTarget][biteCount]} />
-                    {juice && (
-                        <>
-                            <img
-                                src={popImg}
-                                className="juice j1"
-                                draggable={false}
-                                alt=""
-                                style={{
-                                    left: `${juicePos.x}%`,
-                                    top: `${juicePos.y}%`,
-                                    width: "18px",
-                                    height: "18px",
-                                    position: "absolute",
-                                    pointerEvents: "none",
-                                    transform: "rotate(-25deg)",
-                                }}
-                            />
-
-                            <img
-                                src={popImg}
-                                className="juice j2"
-                                draggable={false}
-                                alt=""
-                                style={{
-                                    left: `${juicePos.x}%`,
-                                    top: `${juicePos.y}%`,
-                                    width: "28px",
-                                    height: "28px",
-                                    position: "absolute",
-                                    pointerEvents: "none",
-                                    transform: "rotate(18deg)",
-                                }}
-                            />
-
-                            <img
-                                src={popImg}
-                                className="juice j3"
-                                draggable={false}
-                                alt=""
-                                style={{
-                                    left: `${juicePos.x}%`,
-                                    top: `${juicePos.y}%`,
-                                    width: "22px",
-                                    height: "22px",
-                                    position: "absolute",
-                                    pointerEvents: "none",
-                                    transform: "rotate(110deg)",
-                                }}
-                            />
-
-                            <img
-                                src={popImg}
-                                className="juice j4"
-                                draggable={false}
-                                alt=""
-                                style={{
-                                    left: `${juicePos.x}%`,
-                                    top: `${juicePos.y}%`,
-                                    width: "30px",
-                                    height: "30px",
-                                    position: "absolute",
-                                    pointerEvents: "none",
-                                    transform: "rotate(-75deg)",
-                                }}
-                            />
-                        </>
-                    )}
-                    {showSeed && (
                         <img
-                            src={seedImg}
+                            key={countdown}
+                            src={
+                                countdown === 3
+                                    ? count3Img
+                                    : countdown === 2
+                                        ? count2Img
+                                        : countdown === 1
+                                            ? count1Img
+                                            : goImg
+                            }
                             alt=""
                             draggable={false}
                             style={{
-                                position: "absolute",
-                                left: `${juicePos.x}%`,
-                                top: `${juicePos.y}%`,
-                                width: "22px",
-                                height: "22px",
-                                transform: "translate(-50%, -50%)",
+                                width: countdown === 0 ? "450px" : "220px",
+                                userSelect: "none",
                                 pointerEvents: "none",
-                                animation: "seedPop 0.4s ease-out forwards",
+
+                                animation:
+                                    countdown === 0
+                                        ? "goPop 260ms cubic-bezier(.18,1.3,.32,1)"
+                                        : "countdownSlide 1000ms ease-out",
                             }}
                         />
-                    )}
-                </div>
-            </div>
+                    </div>
+                )}
+                {isGameOver && (
+                    <div
+                        style={{
+                            position: "fixed",
+                            inset: 0,
+                            background: "rgba(0,0,0,0.45)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 999,
+                        }}
+                    >
+                        <div
+                            style={{
+                                background: "white",
+                                borderRadius: "20px",
+                                width: "55%",
+                                maxWidth: "260px",
+                                padding: "20px",
+                                textAlign: "center",
+                                boxShadow: "0 12px 30px rgba(0,0,0,0.2)",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    fontSize: "clamp(24px, 8vw, 36px)",
+                                    marginBottom: "12px",
+                                }}
+                            >
+                                🎉
+                            </div>
 
-            <div
-                style={{
-                    textAlign: "center",
-                    marginBottom: "16px",
-                }}
-            >
+                            <div
+                                style={{
+                                    fontSize: "clamp(20px, 6vw, 28px)",
+                                    fontWeight: "bold",
+                                    marginBottom: "18px",
+                                }}
+                            >
+                                FINISH!
+                            </div>
+
+                            <div
+                                style={{
+                                    fontSize: "clamp(16px, 5vw, 22px)",
+                                    lineHeight: 1.8,
+                                    marginBottom: "24px",
+                                }}
+                            >
+                                <div>기록 : {(finalTime / 1000).toFixed(2)}초</div>
+                                <div>남은 씨앗 : {seedCount}개</div>
+                                <div>페널티 : +{(seedCount * 0.2).toFixed(1)}초</div>
+
+                                <div
+                                    style={{
+                                        marginTop: "10px",
+                                        fontWeight: "bold",
+                                        fontSize: "clamp(18px, 5vw, 24px)",
+                                        color: "#d62828",
+                                    }}
+                                >
+                                    최종기록 : {(finalTime / 1000).toFixed(2)}초
+                                </div>
+                            </div>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    gap: "12px",
+                                }}
+                            >
+                                <button
+                                    onClick={restartGame}
+                                    style={{
+                                        flex: 1,
+                                        padding: "12px 0",
+                                        fontSize: "clamp(14px,3vw,18px)",
+                                        borderRadius: "12px",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        background: "#036d0c",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    다시하기
+                                </button>
+
+                                <button
+                                    onClick={onFinish}
+                                    style={{
+                                        flex: 1,
+                                        padding: "12px 0",
+                                        fontSize: "clamp(14px,3vw,18px)",
+                                        borderRadius: "12px",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        background: "#ff7b00",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    랭킹보기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* 상단 HUD */}
                 <div
                     style={{
                         display: "flex",
                         justifyContent: "center",
-                        marginBottom: "8px",
-                        cursor: "pointer",
-                        position: "relative",
-                        animation:
-                            seedCount >= 10
-                                ? "faceShake 0.14s infinite"
-                                : seedCount >= 7
-                                    ? "faceWobble 0.18s infinite"
-                                    : seedCount >= 4
-                                        ? "faceWobble 0.35s infinite"
-                                        : "faceFloat 1.5s ease-in-out infinite",
+                        alignItems: "center",
+                        marginBottom: "20px",
                     }}
-                    onClick={spitSeeds}
                 >
-                    <Face
-                        state={
-                            seedCount >= 10
-                                ? 4
-                                : seedCount >= 7
-                                    ? 3
-                                    : seedCount >= 4
-                                        ? 2
-                                        : 1
-                        }
-                    />
-                    {flyingSeeds.map((seed) => (
-                        <SeedParticle
-                            key={seed.id}
-                            x={seed.x}
-                            y={seed.y}
-                            delay={seed.delay}
+                    <div
+                        style={{
+                            fontSize: "clamp(14px, 10cqw, 42px)",
+                            fontWeight: "bold",
+                            letterSpacing: "0.4cqw",
+                            color: "#02a710",
+                            WebkitTextStroke: "1px white",
+                            textShadow: "0 2px 4px rgba(248, 243, 243, 0.35)",
+                        }}
+                    >
+                        ⏱ {(time / 1000).toFixed(2)}
+                    </div>
+                </div>
+
+                {/* 남은 수박 표시 */}
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: "0.2cqw",
+                        marginBottom: "3cqw",
+                    }}
+                >
+                    {Array.from({
+                        length: TARGET - count,
+                    }).map((_, i) => (
+                        <div
+                            key={i}
+                            className="watermelon-idle"
+                            style={{
+                                width: "20cqw",
+                                height: "20cqw",
+                                maxWidth: "50px",
+                                maxHeight: "50px",
+                                backgroundImage: `url(${watermelonSheet})`,
+                                backgroundSize: "300% 300%",
+                                backgroundPosition: "0% 0%",
+                                backgroundRepeat: "no-repeat",
+                                animationDelay: `${i * 0.12}s`,
+                            }}
                         />
                     ))}
                 </div>
 
+                {/* 현재 먹는 수박 */}
                 <div
                     style={{
-                        fontSize: "24px",
-                        letterSpacing: "2px",
+                        flex: 1,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <div
+                        onClick={handleEat}
+                        style={{
+                            cursor: "pointer",
+                            userSelect: "none",
+                            textAlign: "center",
+                            transform: `${spawnPop
+                                ? "scale(1.18)"
+                                : pressed
+                                    ? "scale(1.06)"
+                                    : "scale(1)"
+                                } rotate(${rotation}deg)`,
+                            transition: "transform 80ms ease-out",
+                            position: "relative",
+                            display: "inline-block",
+                        }}
+                    >
+                        <WatermelonSprite frame={FRAME_MAPS[biteTarget][biteCount]} />
+                        {juice && (
+                            <>
+                                <img
+                                    src={popImg}
+                                    className="juice j1"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "6cqw",
+                                        height: "6cqw",
+                                        maxWidth: "24px",
+                                        maxHeight: "24px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                        transform: "rotate(-25deg)",
+                                    }}
+                                />
+
+                                <img
+                                    src={popImg}
+                                    className="juice j2"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "3.5cqw",
+                                        height: "3.5cqw",
+                                        maxWidth: "32px",
+                                        maxHeight: "32px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                        transform: "rotate(18deg)",
+                                    }}
+                                />
+
+                                <img
+                                    src={popImg}
+                                    className="juice j3"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "2.7cqw",
+                                        height: "2.7cqw",
+                                        maxWidth: "26px",
+                                        maxHeight: "26px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                        transform: "rotate(110deg)",
+                                    }}
+                                />
+
+                                <img
+                                    src={popImg}
+                                    className="juice j4"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "7cqw",
+                                        height: "7cqw",
+                                        maxWidth: "40px",
+                                        maxHeight: "40px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                        transform: "rotate(-75deg)",
+                                    }}
+                                />
+                                <img
+                                    src={popImg}
+                                    className="juice j5"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "7cqw",
+                                        height: "7cqw",
+                                        maxWidth: "40px",
+                                        maxHeight: "40px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                    }}
+                                />
+                                <img
+                                    src={popImg}
+                                    className="juice j6"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "6cqw",
+                                        height: "6cqw",
+                                        maxWidth: "40px",
+                                        maxHeight: "40px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                    }}
+                                />
+                                <img
+                                    src={popImg}
+                                    className="juice j7"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "5cqw",
+                                        height: "5cqw",
+                                        maxWidth: "40px",
+                                        maxHeight: "40px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                    }}
+                                />
+                                <img
+                                    src={popImg}
+                                    className="juice j8"
+                                    draggable={false}
+                                    alt=""
+                                    style={{
+                                        left: `${juicePos.x}%`,
+                                        top: `${juicePos.y}%`,
+                                        width: "5cqw",
+                                        height: "5cqw",
+                                        maxWidth: "35px",
+                                        maxHeight: "35px",
+                                        position: "absolute",
+                                        pointerEvents: "none",
+                                    }}
+                                />
+                            </>
+                        )}
+                        {showSeed && (
+                            <img
+                                src={seedImg}
+                                alt=""
+                                draggable={false}
+                                style={{
+                                    position: "absolute",
+                                    left: `${juicePos.x}%`,
+                                    top: `${juicePos.y}%`,
+                                    width: "5cqw",
+                                    height: "5cqw",
+                                    maxWidth: "22px",
+                                    maxHeight: "22px",
+                                    transform: "translate(-50%, -50%)",
+                                    pointerEvents: "none",
+                                    animation: "seedPop 1s ease-out forwards",
+                                }}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                <div
+                    style={{
+                        textAlign: "center",
+                        marginBottom: "5cqw",
+                        transform: "translateY(-10cqw)",
                     }}
                 >
                     <div
                         style={{
                             display: "flex",
                             justifyContent: "center",
-                            gap: "4px",
+                            marginBottom: "8px",
+                            cursor: "pointer",
+                            position: "relative",
+                            animation:
+                                seedCount >= 10
+                                    ? "faceShake 0.14s infinite"
+                                    : seedCount >= 7
+                                        ? "faceWobble 0.18s infinite"
+                                        : seedCount >= 4
+                                            ? "faceWobble 0.35s infinite"
+                                            : "faceFloat 1.5s ease-in-out infinite",
                         }}
+                        onClick={spitSeeds}
                     >
-                        {Array.from({ length: 10 }).map((_, i) => (
-                            <img
-                                key={i}
-                                src={seedImg}
-                                alt=""
-                                draggable={false}
-                                style={{
-                                    width: 16,
-                                    height: 16,
-                                    opacity: i < seedCount ? 1 : 0.18,
-                                    userSelect: "none",
-                                }}
+                        <Face
+                            state={
+                                seedCount >= 10
+                                    ? 4
+                                    : seedCount >= 7
+                                        ? 3
+                                        : seedCount >= 4
+                                            ? 2
+                                            : 1
+                            }
+                        />
+                        {flyingSeeds.map((seed) => (
+                            <SeedParticle
+                                key={seed.id}
+                                x={seed.x}
+                                y={seed.y}
+                                delay={seed.delay}
                             />
                         ))}
+                    </div>
+
+                    <div
+                        style={{
+                            fontSize: "3cqw",
+                            letterSpacing: "0.2cqw",
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                gap: "4px",
+                            }}
+                        >
+                            {Array.from({ length: 10 }).map((_, i) => (
+                                <img
+                                    key={i}
+                                    src={seedImg}
+                                    alt=""
+                                    draggable={false}
+                                    style={{
+                                        width: "7cqw",
+                                        height: "7cqw",
+                                        maxWidth: 25,
+                                        maxHeight: 25,
+                                        opacity: i < seedCount ? 1 : 0.18,
+                                        userSelect: "none",
+                                    }}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
