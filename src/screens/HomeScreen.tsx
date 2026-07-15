@@ -1,4 +1,3 @@
-import { Button } from "@toss/tds-mobile";
 import { playHomeBgm } from "../utils/bgm";
 import { useEffect, useState } from "react";
 import HomeScreenBg from "../assets/HomeScreen.webp";
@@ -28,7 +27,7 @@ export default function HomeScreen({
     const nick = nickname.trim();
 
     if (!nick) {
-      alert("닉네임을 입력해주세요.");
+      alert("예) 수박바라기");
       return;
     }
 
@@ -86,7 +85,7 @@ export default function HomeScreen({
             inset: 0,
             width: "100%",
             height: "100%",
-            objectFit: "contain",
+            objectFit: "cover", // contain → cover로 변경
             objectPosition: "center center",
           }}
         />
@@ -160,7 +159,7 @@ export default function HomeScreen({
                 className="nickname-input"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                placeholder="닉네임을 입력해주세요"
+                placeholder="예) 수박바라기"
                 maxLength={12}
                 style={{
                   position: "absolute",
@@ -168,12 +167,13 @@ export default function HomeScreen({
                   top: "50%",
                   transform: "translate(-50%,-50%)",
                   width: "75%",
-                  fontSize: "clamp(10px, 3vw, 30px)",
+                  fontSize: "clamp(8px, 6vw, 30px)",
                   border: "none",
+                  fontWeight: "bold",
                   outline: "none",
                   background: "transparent",
                   textAlign: "center",
-                  color: "black",
+                  color: "#047713",
                 }}
               />
 

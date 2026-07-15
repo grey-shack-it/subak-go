@@ -78,7 +78,7 @@ export default function GameScreen({
 
         return pattern;
     }
-    const [background] = useState(
+    const [background, setBackground] = useState(
         BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]
     );
     const TARGET = 10;
@@ -270,6 +270,7 @@ export default function GameScreen({
     };
 
     const restartGame = () => {
+        setBackground(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]);
         const firstBiteTarget = randomBiteTarget();
         const firstSeedCount = randomSeedCount();
 
@@ -384,7 +385,7 @@ export default function GameScreen({
                             style={{
                                 background: "white",
                                 borderRadius: "20px",
-                                width: "55%",
+                                width: "70%",
                                 maxWidth: "260px",
                                 padding: "20px",
                                 textAlign: "center",

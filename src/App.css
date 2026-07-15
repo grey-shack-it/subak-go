@@ -216,8 +216,8 @@
 }
 
 .nickname-input::placeholder {
-  font-size: clamp(14px, 2.2vw, 24px);
-  color: #999;
+  font-size: clamp(8px, 5.5vw, 30px);
+  color: #dddddd;
 }
 
 .watermelon-idle {
