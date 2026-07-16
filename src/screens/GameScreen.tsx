@@ -16,6 +16,7 @@ import { playSfx } from "../utils/audio";
 import pauseImg from "../assets/pause.webp";
 import resumeImg from "../assets/resume.webp";
 import homeImg from "../assets/home.webp";
+import { loadRewardedAd, watchRewardedAd } from "../utils/ads";
 import watermelonSheet from "../assets/watermelon_sheet.webp";
 import BG1 from "../assets/BG1.webp";
 import BG2 from "../assets/BG2.webp";
@@ -123,6 +124,8 @@ export default function GameScreen({
     );
     const [spawnPop, setSpawnPop] = useState(false);
     const [isGameOver, setIsGameOver] = useState(false);
+    const [adRewardGranted, setAdRewardGranted] = useState(false);
+    const [adLoading, setAdLoading] = useState(false);
     const [finalTime, setFinalTime] = useState(0);
     const [countdown, setCountdown] = useState<number | null>(3);
     const [gameStarted, setGameStarted] = useState(false);
@@ -175,6 +178,38 @@ export default function GameScreen({
         };
         finishGame();
     }, [count]);
+
+    // 게임오버 시점에 페널티(남은 씨앗)가 있으면 리워드 광고를 미리 로드해둠
+    useEffect(() => {
+        if (isGameOver && seedCount > 0) {
+            loadRewardedAd().catch((e) =>
+                console.error("리워드 광고 로드 실패", e)
+            );
+        }
+    }, [isGameOver, seedCount]);
+
+    const handleRemovePenaltyWithAd = () => {
+        setAdLoading(true);
+        watchRewardedAd(
+            async () => {
+                // 광고 시청 완료 → 페널티 없는 기록으로 갱신
+                setAdRewardGranted(true);
+                setAdLoading(false);
+                setFinalTime(time);
+                const nickname = localStorage.getItem("nickname");
+                if (nickname) {
+                    try {
+                        await saveRanking(nickname, time);
+                    } catch (e) {
+                        console.error("랭킹 재저장 실패", e);
+                    }
+                }
+            },
+            () => {
+                setAdLoading(false);
+            }
+        );
+    };
 
     useEffect(() => {
         if (countdown === null) return;
@@ -301,6 +336,8 @@ export default function GameScreen({
 
         setFinalTime(0);
         setIsGameOver(false);
+        setAdRewardGranted(false);
+        setAdLoading(false);
 
         setCountdown(3);
         setGameStarted(false);
@@ -484,7 +521,13 @@ export default function GameScreen({
                             >
                                 <div>기록 : {(finalTime / 1000).toFixed(2)}초</div>
                                 <div>남은 씨앗 : {seedCount}개</div>
-                                <div>페널티 : +{(seedCount * 0.2).toFixed(1)}초</div>
+                                {adRewardGranted ? (
+                                    <div style={{ color: "#036d0c", fontWeight: "bold" }}>
+                                        광고 시청으로 +0초
+                                    </div>
+                                ) : (
+                                    <div>페널티 : +{(seedCount * 0.5).toFixed(1)}초</div>
+                                )}
 
                                 <div
                                     style={{
@@ -497,6 +540,28 @@ export default function GameScreen({
                                     최종기록 : {(finalTime / 1000).toFixed(2)}초
                                 </div>
                             </div>
+
+                            {seedCount > 0 && !adRewardGranted && (
+                                <button
+                                    onClick={handleRemovePenaltyWithAd}
+                                    disabled={adLoading}
+                                    style={{
+                                        width: "100%",
+                                        padding: "12px 0",
+                                        marginBottom: "12px",
+                                        fontSize: "clamp(13px,3vw,16px)",
+                                        borderRadius: "12px",
+                                        border: "none",
+                                        cursor: adLoading ? "default" : "pointer",
+                                        background: adLoading ? "#aaa" : "#4285f4",
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        transition: "transform 0.08s ease",
+                                    }}
+                                >
+                                    {adLoading ? "광고 불러오는 중..." : "📺 광고 보고 씨앗 페널티 없애기"}
+                                </button>
+                            )}
 
                             <div
                                 style={{

@@ -33,6 +33,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!--
+          AdMob 앱 ID (광고 단위 ID랑 다른, 앱 전체 대표 ID)
+          지금은 구글 공식 테스트용 App ID예요.
+          플레이스토어 프로덕션(공개) 출시 직전에 AdMob 콘솔 > 앱 설정에서 확인한
+          본인 앱의 실제 App ID로 반드시 교체해주세요.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
     </application>
 
     <!-- Permissions -->

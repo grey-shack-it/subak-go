@@ -3,6 +3,7 @@ import { getTopRankings, getAllRankings } from "../lib/supabase";
 import RankScreenBg from "../assets/RankScreen.webp";
 import HomeBtn from "../assets/HomeBtn.webp";
 import PressableImage from "../components/PressableImage";
+import { showRankingBanner, hideRankingBanner } from "../utils/ads";
 
 type RankingScreenProps = {
   onHome: () => void;
@@ -14,6 +15,14 @@ export default function RankingScreen({
   const [rankings, setRankings] = useState<any[]>([]);
   const [myRank, setMyRank] = useState<number | null>(null);
   const [myNearbyRanks, setMyNearbyRanks] = useState<any[]>([]);
+
+  useEffect(() => {
+    showRankingBanner().catch((e) => console.error("배너 광고 표시 실패", e));
+    return () => {
+      hideRankingBanner();
+    };
+  }, []);
+
   useEffect(() => {
     const loadRanking = async () => {
       try {
@@ -80,8 +89,8 @@ export default function RankingScreen({
         <div
           style={{
             position: "absolute",
-            top: "15%",
-            bottom: "40%",
+            top: "20%",
+            bottom: "35%",
             overflowY: "auto",
             left: "10%",
             width: "80%",
@@ -160,7 +169,7 @@ export default function RankingScreen({
                   fontSize: 
                     item.nickname === localStorage.getItem("nickname")
                       ? "4cqw"
-                      : "3cqw",
+                      : "4cqw",
                   fontWeight: "bold",                  
                   color:
                     item.nickname === localStorage.getItem("nickname")
@@ -184,10 +193,9 @@ export default function RankingScreen({
           onClick={onHome}
           style={{
             position: "absolute",
-            left: "50%",
-            bottom: "5%",
-            transform: "translateX(-50%)",
-            width: "40%",
+            top: "2%",
+            left: "4%",
+            width: "22%",
             cursor: "pointer",
           }}
         />
