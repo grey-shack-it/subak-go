@@ -13,6 +13,9 @@ import spitSound from "../assets/sounds/spit.ogg";
 import goSound from "../assets/sounds/go.ogg";
 import finishSound from "../assets/sounds/finish.ogg";
 import { playSfx } from "../utils/audio";
+import pauseImg from "../assets/pause.webp";
+import resumeImg from "../assets/resume.webp";
+import homeImg from "../assets/home.webp";
 import watermelonSheet from "../assets/watermelon_sheet.webp";
 import BG1 from "../assets/BG1.webp";
 import BG2 from "../assets/BG2.webp";
@@ -23,6 +26,7 @@ import BG6 from "../assets/BG6.webp";
 import BG7 from "../assets/BG7.webp";
 import BG8 from "../assets/BG8.webp";
 import { saveRanking } from "../lib/supabase";
+import PressableImage from "../components/PressableImage";
 
 const BACKGROUNDS = [
     BG1,
@@ -37,10 +41,12 @@ const BACKGROUNDS = [
 
 type GameScreenProps = {
     onFinish: () => void;
+    onHome: () => void;
 };
 
 export default function GameScreen({
     onFinish,
+    onHome,
 }: GameScreenProps) {
 
     console.log(goSound);
@@ -120,6 +126,7 @@ export default function GameScreen({
     const [finalTime, setFinalTime] = useState(0);
     const [countdown, setCountdown] = useState<number | null>(3);
     const [gameStarted, setGameStarted] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const playGo = () => {
         playSfx(goSound);
     };
@@ -138,14 +145,14 @@ export default function GameScreen({
     };
 
     useEffect(() => {
-        if (!gameStarted || isGameOver) return;
+        if (!gameStarted || isGameOver || isPaused) return;
 
         const timer = setInterval(() => {
             setTime((prev) => prev + 10);
         }, 10);
 
         return () => clearInterval(timer);
-    }, [gameStarted, isGameOver]);
+    }, [gameStarted, isGameOver, isPaused]);
 
     useEffect(() => {
         if (count < TARGET) return;
@@ -193,7 +200,7 @@ export default function GameScreen({
     }, [countdown]);
 
     const handleEat = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!gameStarted || isGameOver) return;
+        if (!gameStarted || isGameOver || isPaused) return;
         playPop();
         const rect = e.currentTarget.getBoundingClientRect();
 
@@ -297,6 +304,7 @@ export default function GameScreen({
 
         setCountdown(3);
         setGameStarted(false);
+        setIsPaused(false);
     };
 
     return (
@@ -326,6 +334,66 @@ export default function GameScreen({
                     boxSizing: "border-box",
                 }}
             >
+                {gameStarted && !isGameOver && (
+                    <PressableImage
+                        src={pauseImg}
+                        alt="일시정지"
+                        draggable={false}
+                        onClick={() => setIsPaused(true)}
+                        style={{
+                            position: "absolute",
+                            top: 16,
+                            left: 16,
+                            width: 40,
+                            height: 40,
+                            zIndex: 998,
+                            cursor: "pointer",
+                        }}
+                    />
+                )}
+                {isPaused && (
+                    <div
+                        style={{
+                            position: "fixed",
+                            inset: 0,
+                            background: "rgba(0,0,0,0.45)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            zIndex: 999,
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "24px",
+                            }}
+                        >
+                            <PressableImage
+                                src={resumeImg}
+                                alt="다시 시작"
+                                draggable={false}
+                                onClick={() => setIsPaused(false)}
+                                style={{
+                                    width: "72px",
+                                    height: "72px",
+                                    cursor: "pointer",
+                                }}
+                            />
+                            <PressableImage
+                                src={homeImg}
+                                alt="홈으로"
+                                draggable={false}
+                                onClick={onHome}
+                                style={{
+                                    width: "72px",
+                                    height: "72px",
+                                    cursor: "pointer",
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
                 {countdown !== null && (
                     <div
                         style={{

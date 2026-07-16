@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getTopRankings, getAllRankings } from "../lib/supabase";
 import RankScreenBg from "../assets/RankScreen.webp";
 import HomeBtn from "../assets/HomeBtn.webp";
+import PressableImage from "../components/PressableImage";
 
 type RankingScreenProps = {
   onHome: () => void;
@@ -176,7 +177,7 @@ export default function RankingScreen({
         </div>
 
         {/* 홈 버튼 */}
-        <img
+        <PressableImage
           src={HomeBtn}
           alt=""
           draggable={false}

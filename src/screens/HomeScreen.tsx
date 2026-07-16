@@ -8,6 +8,7 @@ import NewnicBtn from "../assets/NewnicBtn.webp";
 import UsednicBtn from "../assets/UsednicBtn.webp";
 import UsednicBtnUn from "../assets/UsednicBtnUn.webp";
 import { isNicknameExists } from "../lib/supabase";
+import PressableImage from "../components/PressableImage";
 
 type HomeScreenProps = {
   onStart: () => void;
@@ -91,7 +92,7 @@ export default function HomeScreen({
         />
 
         {/* 게임 시작 버튼 */}
-        <img
+        <PressableImage
           src={StartBtn}
           alt=""
           draggable={false}
@@ -107,7 +108,7 @@ export default function HomeScreen({
         />
 
         {/* 랭킹 버튼 */}
-        <img
+        <PressableImage
           src={RankBtn}
           alt=""
           draggable={false}
@@ -178,7 +179,7 @@ export default function HomeScreen({
               />
 
               {/* 기존 닉네임 */}
-              <img
+              <PressableImage
                 onClick={hasSavedNickname ? handleUseNickname : undefined}
                 src={hasSavedNickname ? UsednicBtn : UsednicBtnUn}
                 alt=""
@@ -193,7 +194,7 @@ export default function HomeScreen({
               />
 
               {/* 새 닉네임 */}
-              <img
+              <PressableImage
                 onClick={handleCreateNickname}
                 src={NewnicBtn}
                 alt=""

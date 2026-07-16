@@ -22,6 +22,7 @@ function App() {
         return (
           <GameScreen
             onFinish={() => setScreen("ranking")}
+            onHome={() => setScreen("home")}
           />
         );
 
