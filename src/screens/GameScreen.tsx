@@ -12,6 +12,7 @@ import popSound from "../assets/sounds/pop.ogg";
 import spitSound from "../assets/sounds/spit.ogg";
 import goSound from "../assets/sounds/go.ogg";
 import finishSound from "../assets/sounds/finish.ogg";
+import { playSfx } from "../utils/audio";
 import watermelonSheet from "../assets/watermelon_sheet.webp";
 import BG1 from "../assets/BG1.webp";
 import BG2 from "../assets/BG2.webp";
@@ -78,7 +79,7 @@ export default function GameScreen({
 
         return pattern;
     }
-    const [background, setBackground] = useState(
+    const [background] = useState(
         BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]
     );
     const TARGET = 10;
@@ -120,24 +121,20 @@ export default function GameScreen({
     const [countdown, setCountdown] = useState<number | null>(3);
     const [gameStarted, setGameStarted] = useState(false);
     const playGo = () => {
-        const audio = new Audio(goSound);
-        audio.play().catch(() => { });
+        playSfx(goSound);
     };
     const playPop = () => {
-        const audio = new Audio(popSound);
-        audio.play().catch(() => { });
+        playSfx(popSound);
     };
     const playSpit = (count: number) => {
         for (let i = 0; i < count; i++) {
             setTimeout(() => {
-                const audio = new Audio(spitSound);
-                audio.play().catch(() => { });
+                playSfx(spitSound);
             }, i * 35);
         }
     };
     const playFinish = () => {
-        const audio = new Audio(finishSound);
-        audio.play().catch(() => { });
+        playSfx(finishSound);
     };
 
     useEffect(() => {
@@ -270,7 +267,6 @@ export default function GameScreen({
     };
 
     const restartGame = () => {
-        setBackground(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]);
         const firstBiteTarget = randomBiteTarget();
         const firstSeedCount = randomSeedCount();
 
@@ -385,7 +381,7 @@ export default function GameScreen({
                             style={{
                                 background: "white",
                                 borderRadius: "20px",
-                                width: "70%",
+                                width: "55%",
                                 maxWidth: "260px",
                                 padding: "20px",
                                 textAlign: "center",
