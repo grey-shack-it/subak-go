@@ -1,1 +1,14 @@
 node_modules
+.env
+.env.local
+
+# 안드로이드 빌드 결과물/캐시 (불필요하게 커질 뿐, 매번 새로 생성 가능)
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/release/
+
+# 서명 키스토어 파일 (혹시라도 프로젝트 폴더 안에 만들 경우 대비)
+*.jks
+*.keystore
