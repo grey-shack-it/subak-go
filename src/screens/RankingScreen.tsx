@@ -38,8 +38,8 @@ export default function RankingScreen({
           if (index >= 0) {
             setMyRank(index + 1);
 
-            const start = Math.max(0, index - 2);
-            const end = Math.min(all.length, index + 3);
+            const start = Math.max(0, index - 1);
+            const end = Math.min(all.length, index + 2);
 
             setMyNearbyRanks(all.slice(start, end));
           }
@@ -98,7 +98,7 @@ export default function RankingScreen({
             fontWeight: "bold",
             fontSize: "4.5cqw",
             lineHeight: "1.3",
-            textAlign: "left",             
+            textAlign: "left",
           }}
         >
           {rankings.map((item, index) => (
@@ -119,13 +119,13 @@ export default function RankingScreen({
                 style={{
                   overflow: "hidden",
                   whiteSpace: "nowrap",
-                  textOverflow: "ellipsis",                  
+                  textOverflow: "ellipsis",
                 }}
               >
                 {item.nickname}
               </div>
 
-              <div style={{ textAlign: "right", whiteSpace: "nowrap",}}>
+              <div style={{ textAlign: "right", whiteSpace: "nowrap", }}>
                 {(item.time_ms / 1000).toFixed(2)}초
               </div>
             </div>
@@ -137,16 +137,21 @@ export default function RankingScreen({
           style={{
             position: "absolute",
             left: "50%",
-            bottom: "16%",
+            top: "69%",
+            bottom: "14%",
             transform: "translateX(-50%)",
             width: "80%",
             color: "#025e0f",
             textAlign: "center",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
         >
           <div
             style={{
-              fontSize: "4.5cqw",
+              fontSize: "6cqw",
               fontWeight: "bold",
               color: "#02470b",
               marginBottom: "5px",
@@ -156,7 +161,7 @@ export default function RankingScreen({
           </div>
 
           {myNearbyRanks.map((item, index) => {
-            const startRank = Math.max(1, myRank! - 2);
+            const startRank = Math.max(1, myRank! - 1);
             const realRank = startRank + index;
 
             return (
@@ -165,12 +170,12 @@ export default function RankingScreen({
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "2px 8px",
-                  fontSize: 
+                  padding: "4px 8px",
+                  fontSize:
                     item.nickname === localStorage.getItem("nickname")
-                      ? "4cqw"
-                      : "4cqw",
-                  fontWeight: "bold",                  
+                      ? "5.5cqw"
+                      : "4.2cqw",
+                  fontWeight: "bold",
                   color:
                     item.nickname === localStorage.getItem("nickname")
                       ? "#c91d1d"
@@ -178,7 +183,17 @@ export default function RankingScreen({
                 }}
               >
                 <span>{realRank}.</span>
-                <span>{item.nickname}</span>
+                <span
+                  style={{
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    flex: 1,
+                    margin: "0 6px",
+                  }}
+                >
+                  {item.nickname}
+                </span>
                 <span>{(item.time_ms / 1000).toFixed(2)}초</span>
               </div>
             );
