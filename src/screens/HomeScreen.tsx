@@ -7,6 +7,13 @@ import NicknamePop from "../assets/NicnamePop.webp";
 import NewnicBtn from "../assets/NewnicBtn.webp";
 import UsednicBtn from "../assets/UsednicBtn.webp";
 import UsednicBtnUn from "../assets/UsednicBtnUn.webp";
+import StartBtnEN from "../assets/StartBtn(en).webp";
+import RankBtnEN from "../assets/RankBtn(en).webp";
+import NicknamePopEN from "../assets/NicnamePop(en).webp";
+import NewnicBtnEN from "../assets/NewnicBtn(en).webp";
+import UsednicBtnEN from "../assets/UsednicBtn(en).webp";
+import UsednicBtnUnEN from "../assets/UsednicBtnUn(en).webp";
+import { isKorean } from "../utils/locale";
 import { isNicknameExists } from "../lib/supabase";
 import PressableImage from "../components/PressableImage";
 
@@ -28,14 +35,14 @@ export default function HomeScreen({
     const nick = nickname.trim();
 
     if (!nick) {
-      alert("예) 수박바라기");
+      alert(ko ? "예) 수박바라기" : "e.g. WatermelonFan");
       return;
     }
 
     const exists = await isNicknameExists(nick);
 
     if (exists) {
-      alert("이미 사용중인 닉네임입니다.");
+      alert(ko ? "이미 사용중인 닉네임입니다." : "This nickname is already taken.");
       return;
     }
 
@@ -46,6 +53,7 @@ export default function HomeScreen({
     setShowPopup(false);
   };
   const [showPopup, setShowPopup] = useState(true);
+  const ko = isKorean();
   const [nickname, setNickname] = useState("");
   const [hasSavedNickname, setHasSavedNickname] = useState(false);
   useEffect(() => {
@@ -93,7 +101,7 @@ export default function HomeScreen({
 
         {/* 게임 시작 버튼 */}
         <PressableImage
-          src={StartBtn}
+          src={ko ? StartBtn : StartBtnEN}
           alt=""
           draggable={false}
           onClick={onStart}
@@ -109,7 +117,7 @@ export default function HomeScreen({
 
         {/* 랭킹 버튼 */}
         <PressableImage
-          src={RankBtn}
+          src={ko ? RankBtn : RankBtnEN}
           alt=""
           draggable={false}
           onClick={onRanking}
@@ -146,7 +154,7 @@ export default function HomeScreen({
               }}
             >
               <img
-                src={NicknamePop}
+                src={ko ? NicknamePop : NicknamePopEN}
                 alt=""
                 draggable={false}
                 style={{
@@ -160,7 +168,7 @@ export default function HomeScreen({
                 className="nickname-input"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                placeholder="예) 수박바라기"
+                placeholder={ko ? "예) 수박바라기" : "e.g. WatermelonFan"}
                 maxLength={12}
                 style={{
                   position: "absolute",
@@ -181,7 +189,7 @@ export default function HomeScreen({
               {/* 기존 닉네임 */}
               <PressableImage
                 onClick={hasSavedNickname ? handleUseNickname : undefined}
-                src={hasSavedNickname ? UsednicBtn : UsednicBtnUn}
+                src={ko ? (hasSavedNickname ? UsednicBtn : UsednicBtnUn) : (hasSavedNickname ? UsednicBtnEN : UsednicBtnUnEN)}
                 alt=""
                 draggable={false}
                 style={{
@@ -196,7 +204,7 @@ export default function HomeScreen({
               {/* 새 닉네임 */}
               <PressableImage
                 onClick={handleCreateNickname}
-                src={NewnicBtn}
+                src={ko ? NewnicBtn : NewnicBtnEN}
                 alt=""
                 draggable={false}
                 style={{

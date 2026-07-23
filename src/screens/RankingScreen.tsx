@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { getTopRankings, getAllRankings } from "../lib/supabase";
 import RankScreenBg from "../assets/RankScreen.webp";
 import HomeBtn from "../assets/HomeBtn.webp";
+import RankScreenBgEN from "../assets/RankScreen(en).webp";
+import HomeBtnEN from "../assets/HomeBtn(en).webp";
 import PressableImage from "../components/PressableImage";
 import { showRankingBanner, hideRankingBanner } from "../utils/ads";
+import { isKorean } from "../utils/locale";
 
 type RankingScreenProps = {
   onHome: () => void;
@@ -12,6 +15,7 @@ type RankingScreenProps = {
 export default function RankingScreen({
   onHome,
 }: RankingScreenProps) {
+  const ko = isKorean();
   const [rankings, setRankings] = useState<any[]>([]);
   const [myRank, setMyRank] = useState<number | null>(null);
   const [myNearbyRanks, setMyNearbyRanks] = useState<any[]>([]);
@@ -73,7 +77,7 @@ export default function RankingScreen({
       >
         {/* 배경 */}
         <img
-          src={RankScreenBg}
+          src={ko ? RankScreenBg : RankScreenBgEN}
           alt=""
           draggable={false}
           style={{
@@ -126,7 +130,7 @@ export default function RankingScreen({
               </div>
 
               <div style={{ textAlign: "right", whiteSpace: "nowrap", }}>
-                {(item.time_ms / 1000).toFixed(2)}초
+                {(item.time_ms / 1000).toFixed(2)}{ko ? "초" : "s"}
               </div>
             </div>
           ))}
@@ -157,7 +161,7 @@ export default function RankingScreen({
               marginBottom: "5px",
             }}
           >
-            내 순위 : {myRank ? `${myRank}위` : "-"}
+            {ko ? "내 순위" : "My Rank"} : {myRank ? (ko ? `${myRank}위` : `#${myRank}`) : "-"}
           </div>
 
           {myNearbyRanks.map((item, index) => {
@@ -194,7 +198,7 @@ export default function RankingScreen({
                 >
                   {item.nickname}
                 </span>
-                <span>{(item.time_ms / 1000).toFixed(2)}초</span>
+                <span>{(item.time_ms / 1000).toFixed(2)}{ko ? "초" : "s"}</span>
               </div>
             );
           })}
@@ -202,7 +206,7 @@ export default function RankingScreen({
 
         {/* 홈 버튼 */}
         <PressableImage
-          src={HomeBtn}
+          src={ko ? HomeBtn : HomeBtnEN}
           alt=""
           draggable={false}
           onClick={onHome}

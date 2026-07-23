@@ -28,6 +28,7 @@ import BG7 from "../assets/BG7.webp";
 import BG8 from "../assets/BG8.webp";
 import { saveRanking } from "../lib/supabase";
 import PressableImage from "../components/PressableImage";
+import { isKorean } from "../utils/locale";
 
 const BACKGROUNDS = [
     BG1,
@@ -50,6 +51,7 @@ export default function GameScreen({
     onHome,
 }: GameScreenProps) {
 
+    const ko = isKorean();
     console.log(goSound);
 
     function randomBiteTarget() {
@@ -519,14 +521,14 @@ export default function GameScreen({
                                     marginBottom: "24px",
                                 }}
                             >
-                                <div>기록 : {(finalTime / 1000).toFixed(2)}초</div>
-                                <div>남은 씨앗 : {seedCount}개</div>
+                                <div>{ko ? "기록" : "Record"} : {(finalTime / 1000).toFixed(2)}{ko ? "초" : "s"}</div>
+                                <div>{ko ? "남은 씨앗" : "Seeds left"} : {seedCount}{ko ? "개" : ""}</div>
                                 {adRewardGranted ? (
                                     <div style={{ color: "#036d0c", fontWeight: "bold" }}>
-                                        광고 시청으로 +0초
+                                        {ko ? "광고 시청으로 +0초" : "Ad watched: +0s"}
                                     </div>
                                 ) : (
-                                    <div>페널티 : +{(seedCount * 0.5).toFixed(1)}초</div>
+                                    <div>{ko ? "페널티" : "Penalty"} : +{(seedCount * 0.5).toFixed(1)}{ko ? "초" : "s"}</div>
                                 )}
 
                                 <div
@@ -537,7 +539,7 @@ export default function GameScreen({
                                         color: "#d62828",
                                     }}
                                 >
-                                    최종기록 : {(finalTime / 1000).toFixed(2)}초
+                                    {ko ? "최종기록" : "Final Time"} : {(finalTime / 1000).toFixed(2)}{ko ? "초" : "s"}
                                 </div>
                             </div>
 
@@ -559,7 +561,9 @@ export default function GameScreen({
                                         transition: "transform 0.08s ease",
                                     }}
                                 >
-                                    {adLoading ? "광고 불러오는 중..." : "📺 광고 보고 씨앗 페널티 없애기"}
+                                    {adLoading
+                                        ? (ko ? "광고 불러오는 중..." : "Loading ad...")
+                                        : (ko ? "📺 광고 보고 씨앗 페널티 없애기" : "📺 Watch ad to remove penalty")}
                                 </button>
                             )}
 
@@ -584,7 +588,7 @@ export default function GameScreen({
                                         fontWeight: "bold",
                                     }}
                                 >
-                                    다시하기
+                                    {ko ? "다시하기" : "Retry"}
                                 </button>
 
                                 <button
@@ -601,7 +605,7 @@ export default function GameScreen({
                                         fontWeight: "bold",
                                     }}
                                 >
-                                    랭킹보기
+                                    {ko ? "랭킹보기" : "Rankings"}
                                 </button>
                             </div>
                         </div>
