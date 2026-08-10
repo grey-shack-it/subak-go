@@ -16,6 +16,13 @@ import UsednicBtnUnEN from "../assets/UsednicBtnUn(en).webp";
 import { isKorean } from "../utils/locale";
 import { isNicknameExists } from "../lib/supabase";
 import PressableImage from "../components/PressableImage";
+import {
+  getActiveNickname,
+  getNicknameHistory,
+  isNicknameInHistory,
+  saveNewNickname,
+  switchToExistingNickname,
+} from "../utils/nicknameStorage";
 
 type HomeScreenProps = {
   onStart: () => void;
@@ -27,6 +34,18 @@ export default function HomeScreen({
   onRanking,
 }: HomeScreenProps) {
   const handleUseNickname = () => {
+    const nick = nickname.trim();
+
+    if (!isNicknameInHistory(nick)) {
+      alert(
+        ko
+          ? "이 기기에서 사용한 적 없는 닉네임이에요."
+          : "This nickname hasn't been used on this device."
+      );
+      return;
+    }
+
+    switchToExistingNickname(nick);
     playHomeBgm();
     setShowPopup(false);
   };
@@ -46,7 +65,7 @@ export default function HomeScreen({
       return;
     }
 
-    localStorage.setItem("nickname", nick);
+    saveNewNickname(nick);
 
     playHomeBgm();
 
@@ -57,12 +76,13 @@ export default function HomeScreen({
   const [nickname, setNickname] = useState("");
   const [hasSavedNickname, setHasSavedNickname] = useState(false);
   useEffect(() => {
-    const saved = localStorage.getItem("nickname");
+    const active = getActiveNickname();
+    const history = getNicknameHistory();
 
-    if (saved) {
-      setNickname(saved);
-      setHasSavedNickname(true);
+    if (active) {
+      setNickname(active);
     }
+    setHasSavedNickname(history.length > 0);
   }, []);
 
   return (
