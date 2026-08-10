@@ -1,21 +1,35 @@
 import { useEffect, useState } from "react";
-import { getTopRankings, getAllRankings } from "../lib/supabase";
+import {
+  getTopRankings,
+  getAllRankings,
+  getPeriodRankings,
+} from "../lib/supabase";
 import RankScreenBg from "../assets/RankScreen.webp";
 import HomeBtn from "../assets/HomeBtn.webp";
 import RankScreenBgEN from "../assets/RankScreen(en).webp";
 import HomeBtnEN from "../assets/HomeBtn(en).webp";
+import SelectedTab from "../assets/selected.webp";
 import PressableImage from "../components/PressableImage";
 import { showRankingBanner, hideRankingBanner } from "../utils/ads";
 import { isKorean } from "../utils/locale";
+
+type Period = "week" | "month" | "all";
 
 type RankingScreenProps = {
   onHome: () => void;
 };
 
-export default function RankingScreen({
-  onHome,
-}: RankingScreenProps) {
+const TAB_LABELS: Record<Period, { ko: string; en: string }> = {
+  week: { ko: "주간", en: "Weekly" },
+  month: { ko: "월간", en: "Monthly" },
+  all: { ko: "G.O.A.T", en: "G.O.A.T" },
+};
+
+const TAB_ORDER: Period[] = ["week", "month", "all"];
+
+export default function RankingScreen({ onHome }: RankingScreenProps) {
   const ko = isKorean();
+  const [period, setPeriod] = useState<Period>("week");
   const [rankings, setRankings] = useState<any[]>([]);
   const [myRank, setMyRank] = useState<number | null>(null);
   const [myNearbyRanks, setMyNearbyRanks] = useState<any[]>([]);
@@ -30,23 +44,36 @@ export default function RankingScreen({
   useEffect(() => {
     const loadRanking = async () => {
       try {
-        const top10 = await getTopRankings();
-        setRankings(top10 ?? []);
+        const top50 =
+          period === "all"
+            ? await getTopRankings()
+            : await getPeriodRankings(period, 50);
+        setRankings(top50 ?? []);
+
         const nickname = localStorage.getItem("nickname");
-        if (nickname) {
-          const all = await getAllRankings();
-          const index = all.findIndex(
-            (item) => item.nickname === nickname
-          );
+        if (!nickname) {
+          setMyRank(null);
+          setMyNearbyRanks([]);
+          return;
+        }
 
-          if (index >= 0) {
-            setMyRank(index + 1);
+        const all =
+          period === "all"
+            ? await getAllRankings()
+            : await getPeriodRankings(period, 100000);
 
-            const start = Math.max(0, index - 1);
-            const end = Math.min(all.length, index + 2);
+        const index = all.findIndex(
+          (item: any) => item.nickname === nickname
+        );
 
-            setMyNearbyRanks(all.slice(start, end));
-          }
+        if (index >= 0) {
+          setMyRank(index + 1);
+          const start = Math.max(0, index - 1);
+          const end = Math.min(all.length, index + 2);
+          setMyNearbyRanks(all.slice(start, end));
+        } else {
+          setMyRank(null);
+          setMyNearbyRanks([]);
         }
       } catch (e) {
         console.error("랭킹 불러오기 실패", e);
@@ -54,7 +81,8 @@ export default function RankingScreen({
     };
 
     loadRanking();
-  }, []);
+  }, [period]);
+
   return (
     <div
       style={{
@@ -89,11 +117,59 @@ export default function RankingScreen({
           }}
         />
 
+        {/* 탭 바 */}
+        <div
+          style={{
+            position: "absolute",
+            top: "7.08%",
+            left: "10.65%",
+            width: "78.7%",
+            height: "5.15%",
+            display: "flex",
+          }}
+        >
+          <img
+            src={SelectedTab}
+            alt=""
+            draggable={false}
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: `${TAB_ORDER.indexOf(period) * 33.33 + 2.5}%`,
+              width: "28.3%",
+              transform: "translateY(-50%)",
+              transition: "left 0.2s ease",
+              pointerEvents: "none",
+            }}
+          />
+
+          {TAB_ORDER.map((p) => (
+            <div
+              key={p}
+              onClick={() => setPeriod(p)}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontSize: "3.8cqw",
+                fontWeight: "bold",
+                color: period === p ? "#ffffff" : "#4a4a4a",
+                zIndex: 1,
+                transition: "color 0.2s ease",
+              }}
+            >
+              {ko ? TAB_LABELS[p].ko : TAB_LABELS[p].en}
+            </div>
+          ))}
+        </div>
+
         {/* 랭킹 영역 */}
         <div
           style={{
             position: "absolute",
-            top: "20%",
+            top: "23.3%",
             bottom: "35%",
             overflowY: "auto",
             left: "10%",
@@ -107,7 +183,7 @@ export default function RankingScreen({
         >
           {rankings.map((item, index) => (
             <div
-              key={item.id}
+              key={item.id ?? `${item.nickname}-${index}`}
               style={{
                 display: "grid",
                 gridTemplateColumns: "12cqw 1fr 22cqw",
@@ -115,9 +191,7 @@ export default function RankingScreen({
                 padding: "0.5cqw 1cqw",
               }}
             >
-              <div style={{ textAlign: "left" }}>
-                {index + 1}
-              </div>
+              <div style={{ textAlign: "left" }}>{index + 1}</div>
 
               <div
                 style={{
@@ -129,8 +203,9 @@ export default function RankingScreen({
                 {item.nickname}
               </div>
 
-              <div style={{ textAlign: "right", whiteSpace: "nowrap", }}>
-                {(item.time_ms / 1000).toFixed(2)}{ko ? "초" : "s"}
+              <div style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                {(item.time_ms / 1000).toFixed(2)}
+                {ko ? "초" : "s"}
               </div>
             </div>
           ))}
@@ -161,16 +236,17 @@ export default function RankingScreen({
               marginBottom: "5px",
             }}
           >
-            {ko ? "내 순위" : "My Rank"} : {myRank ? (ko ? `${myRank}위` : `#${myRank}`) : "-"}
+            {ko ? "내 순위" : "My Rank"} :{" "}
+            {myRank ? (ko ? `${myRank}위` : `#${myRank}`) : "-"}
           </div>
 
           {myNearbyRanks.map((item, index) => {
-            const startRank = Math.max(1, myRank! - 1);
+            const startRank = Math.max(1, (myRank ?? 1) - 1);
             const realRank = startRank + index;
 
             return (
               <div
-                key={item.id}
+                key={item.id ?? `${item.nickname}-${index}`}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -198,7 +274,10 @@ export default function RankingScreen({
                 >
                   {item.nickname}
                 </span>
-                <span>{(item.time_ms / 1000).toFixed(2)}{ko ? "초" : "s"}</span>
+                <span>
+                  {(item.time_ms / 1000).toFixed(2)}
+                  {ko ? "초" : "s"}
+                </span>
               </div>
             );
           })}
@@ -214,7 +293,7 @@ export default function RankingScreen({
             position: "absolute",
             top: "2%",
             left: "4%",
-            width: "22%",
+            width: "18%",
             cursor: "pointer",
           }}
         />

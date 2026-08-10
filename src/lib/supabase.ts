@@ -5,8 +5,6 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
   {
     global: {
-      // WebView가 GET 요청(랭킹 조회 등)을 디스크에 캐싱해서
-      // 서버 데이터가 바뀌어도 예전 응답을 그대로 재사용하는 문제를 방지
       fetch: (input, init) =>
         fetch(input, { ...init, cache: "no-store" }),
     },
@@ -29,6 +27,15 @@ export async function saveRanking(
   nickname: string,
   timeMs: number
 ) {
+  // 매 플레이 기록을 방명록(play_history)에 저장 — 주간/월간 랭킹 계산용
+  const { error: historyError } = await supabase
+    .from("subakgo_play_history")
+    .insert({ nickname, time_ms: timeMs });
+
+  if (historyError) {
+    console.error("플레이 기록 저장 실패", historyError);
+  }
+
   const oldRecord = await getRankingByNickname(nickname);
 
   // 처음 플레이
@@ -45,8 +52,7 @@ export async function saveRanking(
   }
 
   // 최고기록 갱신인 경우만 UPDATE
-    if (timeMs < oldRecord.time_ms) {
-  
+  if (timeMs < oldRecord.time_ms) {
     const { error } = await supabase
       .from("subakgo_rankings")
       .update({
@@ -87,6 +93,21 @@ export async function getAllRankings() {
     .from("subakgo_rankings")
     .select("*")
     .order("time_ms", { ascending: true });
+
+  if (error) throw error;
+
+  return data ?? [];
+}
+
+// 주간/월간 랭킹 조회 (limit 크게 주면 "내 순위" 계산용 전체 리스트로도 사용 가능)
+export async function getPeriodRankings(
+  period: "week" | "month",
+  limit = 50
+) {
+  const { data, error } = await supabase.rpc("get_period_rankings", {
+    period,
+    limit_count: limit,
+  });
 
   if (error) throw error;
 
