@@ -7,8 +7,8 @@ android {
         applicationId "com.larapapa.subakgo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6  //빌드 
-        versionName "1.2.0"  //버전
+        versionCode 7  //빌드 
+        versionName "1.2.1"  //버전
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

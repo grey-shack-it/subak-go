@@ -163,13 +163,13 @@ export default function GameScreen({
         if (count < TARGET) return;
         const finishGame = async () => {
             playFinish();
-            const penalty = seedCount * 200;
+            const penalty = seedCount * 500;
             const finalRecord = time + penalty;
             setFinalTime(finalRecord);
             const nickname = localStorage.getItem("nickname");
             if (nickname) {
                 try {
-                    const penalty = seedCount * 200;
+                    const penalty = seedCount * 500;
                     const finalRecord = time + penalty;
                     await saveRanking(nickname, finalRecord);
                 } catch (e) {
