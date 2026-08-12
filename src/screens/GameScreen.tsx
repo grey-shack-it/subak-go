@@ -163,20 +163,18 @@ export default function GameScreen({
         if (count < TARGET) return;
         const finishGame = async () => {
             playFinish();
-            const penalty = seedCount * 500;
-            const finalRecord = time + penalty;
+            const baseRecord = time;
+            const finalRecord = baseRecord + seedCount * 500;
             setFinalTime(finalRecord);
+            setIsGameOver(true);
             const nickname = localStorage.getItem("nickname");
             if (nickname) {
                 try {
-                    const penalty = seedCount * 500;
-                    const finalRecord = time + penalty;
                     await saveRanking(nickname, finalRecord);
                 } catch (e) {
                     console.error("랭킹 저장 실패", e);
                 }
             }
-            setIsGameOver(true);
         };
         finishGame();
     }, [count]);
@@ -521,7 +519,7 @@ export default function GameScreen({
                                     marginBottom: "24px",
                                 }}
                             >
-                                <div>{ko ? "기록" : "Record"} : {(finalTime / 1000).toFixed(2)}{ko ? "초" : "s"}</div>
+                                <div>{ko ? "기록" : "Record"} : {((adRewardGranted ? finalTime : finalTime - seedCount * 500) / 1000).toFixed(2)}{ko ? "초" : "s"}</div>
                                 <div>{ko ? "남은 씨앗" : "Seeds left"} : {seedCount}{ko ? "개" : ""}</div>
                                 {adRewardGranted ? (
                                     <div style={{ color: "#036d0c", fontWeight: "bold" }}>
@@ -630,7 +628,7 @@ export default function GameScreen({
                             textShadow: "0 2px 4px rgba(248, 243, 243, 0.35)",
                         }}
                     >
-                        ⏱ {(time / 1000).toFixed(2)}
+                        ⏱ {((isGameOver ? (adRewardGranted ? finalTime : finalTime - seedCount * 500) : time) / 1000).toFixed(2)}
                     </div>
                 </div>
 
